@@ -1,13 +1,13 @@
-package com.poweringa.nika;
+package com.poweringa.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NikaApplication {
+public class PowerIngaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NikaApplication.class, args);
+		SpringApplication.run(PowerIngaApplication.class, args);
 	}
 
 }
