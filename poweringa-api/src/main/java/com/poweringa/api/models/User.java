@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,19 +17,20 @@ import java.util.List;
 @Document(collection = "users")
 public class User implements UserDetails {
     @Id
-    private String idUsers;
+    private String id;
+
     private String email;
     private String senha;
     private UserRole cargo;
     private String descricao;
-    private Integer pontos;
+    private List<Solicitacao> solicitacoes = new ArrayList<>();
+    private Integer pontos = 0;
 
-    public User(String email, String senha, UserRole cargo, String descricao, Integer pontos) {
+    public User(String email, String senha, UserRole cargo, String descricao) {
         this.email = email;
         this.senha = senha;
         this.cargo = cargo;
         this.descricao = descricao;
-        this.pontos = pontos;
     }
 
     @Override
