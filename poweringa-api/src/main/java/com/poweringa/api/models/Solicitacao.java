@@ -5,5 +5,5 @@ import com.poweringa.api.enums.SolicitacaoStatus;
 public class Solicitacao {
     private String descricao;
     private SolicitacaoStatus status;
-    //TODO - Campo de idCategoria
+    //TO DO - Campo de idCategoria
 }
