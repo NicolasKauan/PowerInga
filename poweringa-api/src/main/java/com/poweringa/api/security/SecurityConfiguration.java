@@ -24,7 +24,7 @@ public class SecurityConfiguration {
                                 SessionCreationPolicy.STATELESS
                         )
                 )
-                .httpBasic(httpBasic -> {})
+                .addFilterBefore()
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()

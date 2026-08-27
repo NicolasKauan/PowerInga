@@ -1,6 +1,7 @@
 package com.poweringa.api.controllers;
 
 import com.poweringa.api.dtos.LoginRequestDTO;
+import com.poweringa.api.dtos.LoginResponseDTO;
 import com.poweringa.api.dtos.RegisterRequestDTO;
 import com.poweringa.api.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,16 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO data) {
-        authService.login(data);
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO data) {
+        String token = authService.login(data);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO data) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO data) {
         authService.register(data);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Usuário criado com sucesso!");
     }
 }
