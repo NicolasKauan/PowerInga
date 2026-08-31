@@ -12,9 +12,11 @@ public class Solicitacao {
     private String id;
     private String descricao;
     private SolicitacaoStatus status = SolicitacaoStatus.PENDENTE;
-    //TO DO - Campo de idCategoria
 
-    public Solicitacao(String descricao) {
+    private User usuario;
+
+    public Solicitacao(String descricao, User usuario) {
         this.descricao = descricao;
+        this.usuario = usuario;
     }
 }
