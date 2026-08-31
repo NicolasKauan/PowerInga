@@ -1,5 +1,6 @@
 package com.poweringa.api.services;
 
+import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.models.Solicitacao;
 import com.poweringa.api.models.User;
@@ -26,8 +27,12 @@ public class SolicitacaoService {
         return usuarioLogado.getSolicitacoes();
     }
 
-    public Solicitacao create(Solicitacao solicitacao, User usuarioLogado) {
-        Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
+    public Solicitacao findById(String id, User usuarioLogado) {
+        return solicitacaoRepository.findByIdAndUsuario_Id(id, usuarioLogado.getIdUser()).orElseThrow(() -> new);
+    }
+
+    public Solicitacao create(SolicitacaoCreateDTO dto, User usuarioLogado) {
+        Solicitacao solicitacaoSalva = solicitacaoRepository.save(toEntity(dto, usuarioLogado));
 
         saveSolicitacaoToUser(solicitacaoSalva, usuarioLogado);
 
@@ -38,5 +43,9 @@ public class SolicitacaoService {
         usuarioLogado.getSolicitacoes().add(solicitacao);
 
         userRepository.save(usuarioLogado);
+    }
+
+    public Solicitacao toEntity(SolicitacaoCreateDTO dto, User usuarioLogado) {
+        return new Solicitacao(dto.descricao(), usuarioLogado);
     }
 }
