@@ -32,6 +32,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/solicitacoes/{id}/aprovar").hasRole("GESTOR")
+                        .requestMatchers(HttpMethod.PATCH, "/solicitacoes/{id}/reprovar").hasRole("GESTOR")
                         .requestMatchers(HttpMethod.GET, "/users").hasRole("GESTOR")
                         .requestMatchers(HttpMethod.POST, "/produtos").hasRole("GESTOR")
                         .requestMatchers(HttpMethod.PUT, "/produtos/{id}").hasRole("GESTOR")
