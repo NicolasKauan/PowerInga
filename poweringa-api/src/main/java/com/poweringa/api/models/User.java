@@ -23,7 +23,6 @@ public class User implements UserDetails {
     private String senha;
     private UserRole cargo;
     private String descricao;
-    private List<Solicitacao> solicitacoes = new ArrayList<>();
     private Integer pontos = 0;
 
     public User(String email, String senha, UserRole cargo, String descricao) {
