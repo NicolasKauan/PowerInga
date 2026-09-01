@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor//Esse daqui é para criar o construtor com todos os atributos, para usarmos para criar o objeto no código
 @Data//lombok para os getter e setters
 @Document(collection = "produtos")
-public class Produtos {
+public class ProdutosModel {
     @Id
     private String id;
 
