@@ -32,7 +32,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/solicitacoes").hasAnyRole("GESTOR", "CLIENTE")
+                        .requestMatchers(HttpMethod.PATCH, "/solicitacoes/{id}/aprovar").hasRole("GESTOR")
+                        .requestMatchers(HttpMethod.PATCH, "/solicitacoes/{id}/reprovar").hasRole("GESTOR")
                         .requestMatchers(HttpMethod.GET, "/users").hasRole("GESTOR")
                         .anyRequest().authenticated()
                 )
