@@ -1,5 +1,6 @@
 package com.poweringa.api.controllers;
 
+import com.poweringa.api.dtos.ClassificarSolicitacaoRequestDTO;
 import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.dtos.SolicitacaoResponseDTO;
 import com.poweringa.api.models.User;
@@ -47,5 +48,13 @@ public class SolicitacaoController {
             @PathVariable String id
     ) {
         return ResponseEntity.ok(solicitacaoService.reject(id));
+    }
+
+    //endpoint para a classificação das categorias
+    @PatchMapping("/{id}/classificar")
+    public ResponseEntity<SolicitacaoResponseDTO> classificar(
+            @PathVariable String id,
+            @RequestBody ClassificarSolicitacaoRequestDTO dto) {
+        return ResponseEntity.ok(solicitacaoService.classificar(id, dto));
     }
 }
