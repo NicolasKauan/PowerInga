@@ -44,4 +44,14 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_CLIENTE"));
     }
 
+    @Override
+    public @Nullable String getPassword() {
+        return senha;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
 }
