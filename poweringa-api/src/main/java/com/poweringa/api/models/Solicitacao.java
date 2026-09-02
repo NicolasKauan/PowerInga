@@ -1,5 +1,6 @@
 package com.poweringa.api.models;
 
+import com.poweringa.api.enums.Categorias;
 import com.poweringa.api.enums.SolicitacaoStatus;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
