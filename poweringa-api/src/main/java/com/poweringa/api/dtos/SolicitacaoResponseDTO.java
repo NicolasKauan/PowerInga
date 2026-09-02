@@ -1,7 +1,6 @@
 package com.poweringa.api.dtos;
 
-import com.poweringa.api.enums.Categorias;
 import com.poweringa.api.enums.SolicitacaoStatus;
 
-public record SolicitacaoResponseDTO(String descricao, SolicitacaoStatus solicitacaoStatus, Categorias categoria) {
+public record SolicitacaoResponseDTO(String id, String descricao, SolicitacaoStatus status, String id_usuario) {
 }
