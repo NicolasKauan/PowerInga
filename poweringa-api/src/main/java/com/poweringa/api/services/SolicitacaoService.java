@@ -1,5 +1,6 @@
 package com.poweringa.api.services;
 
+import com.poweringa.api.dtos.ClassificarSolicitacaoRequestDTO;
 import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.dtos.SolicitacaoResponseDTO;
 import com.poweringa.api.enums.SolicitacaoStatus;
@@ -69,6 +70,23 @@ public class SolicitacaoService {
         return toDTO(solicitacaoRepository.save(solicitacao));
     }
 
+
+    // comando para que localizar a solicitação e atribuir os pontos para o usuario.
+    public SolicitacaoResponseDTO classificar(String id, ClassificarSolicitacaoRequestDTO dto) {
+        Solicitacao solicitacao = solicitacaoRepository.findById(id).orElseThrow(()
+                -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));
+    // Acima localiza o código para partir do ID e, caso não encontre, lança uma exceção informando que não foi encontrado.
+        solicitacao.setCategoria(dto.categoria());
+        solicitacaoRepository.save(solicitacao);
+
+        //Pega o usuario da solicitação verifica os pontos atuais e soma com os pontos da categoria
+        User usuario = solicitacao.getUsuario();
+        usuario.setPontos(usuario.getPontos() + dto.categoria().getPontos());
+
+        return toDTO(solicitacaoRepository.save(solicitacao));
+
+    }
+
     public Solicitacao toEntity(SolicitacaoCreateDTO dto, User usuarioLogado) {
         return new Solicitacao(dto.descricao(), usuarioLogado);
     }
@@ -78,7 +96,8 @@ public class SolicitacaoService {
                 solicitacao.getId(),
                 solicitacao.getDescricao(),
                 solicitacao.getStatus(),
-                solicitacao.getUsuario().getId()
+                solicitacao.getUsuario().getId(),
+                solicitacao.getCategoria()
         );
     }
 }
