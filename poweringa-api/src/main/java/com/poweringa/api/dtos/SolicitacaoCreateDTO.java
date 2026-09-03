@@ -1,4 +1,6 @@
 package com.poweringa.api.dtos;
 
-public record SolicitacaoCreateDTO(String descricao) {
+import com.poweringa.api.enums.CategoriaRecompensa;
+
+public record SolicitacaoCreateDTO(String descricao, CategoriaRecompensa categoria) {
 }
