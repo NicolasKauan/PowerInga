@@ -30,6 +30,7 @@ public class SecurityConfiguration {
                         )
                 )
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/solicitacoes/{id}/aprovar").hasRole("GESTOR")
