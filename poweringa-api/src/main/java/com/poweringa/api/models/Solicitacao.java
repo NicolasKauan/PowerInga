@@ -17,8 +17,9 @@ public class Solicitacao {
 
     private User usuario;
 
-    public Solicitacao(String descricao, User usuario) {
+    public Solicitacao(String descricao, CategoriaRecompensa categoria, User usuario) {
         this.descricao = descricao;
+        this.categoria = categoria;
         this.usuario = usuario;
     }
 }
