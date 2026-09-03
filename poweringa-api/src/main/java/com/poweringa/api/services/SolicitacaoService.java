@@ -56,7 +56,11 @@ public class SolicitacaoService {
 
     public SolicitacaoResponseDTO approve(String id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));;
+                .orElseThrow(() -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));
+
+        if (solicitacao.getStatus() != SolicitacaoStatus.PENDENTE) {
+            throw new RuntimeException("ERRO: Solicitação já resolvida!");
+        }
 
         User usuarioDaSolicitacao = solicitacao.getUsuario();
 
@@ -74,6 +78,10 @@ public class SolicitacaoService {
     public SolicitacaoResponseDTO reject(String id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));
+
+        if (solicitacao.getStatus() != SolicitacaoStatus.PENDENTE) {
+            throw new RuntimeException("ERRO: Solicitação já resolvida!");
+        }
 
         solicitacao.setStatus(SolicitacaoStatus.REPROVADO);
 
