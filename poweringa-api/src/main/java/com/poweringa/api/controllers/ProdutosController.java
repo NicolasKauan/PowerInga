@@ -1,5 +1,7 @@
 package com.poweringa.api.controllers;
 
+import com.poweringa.api.dtos.ProdutoRequestDTO;
+import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.models.ProdutosModel;
 import com.poweringa.api.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,28 +19,28 @@ public class ProdutosController {
 
     // POST /produtos
     @PostMapping
-    public ResponseEntity<ProdutosModel> save(@RequestBody ProdutosModel produto){
-        ProdutosModel produtoSalvo = produtoService.save(produto);
+    public ResponseEntity<ProdutoResponseDTO> save(@RequestBody ProdutoRequestDTO dto){
+        ProdutoResponseDTO produtoSalvo = produtoService.save(dto);
         //Retorna o status 201(Criado) e o produto salvo no corpo da resposta .body
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
     }
 
     //Get /produtos
     @GetMapping
-    public ResponseEntity<List<ProdutosModel>> findAll(){
+    public ResponseEntity<List<ProdutoResponseDTO>> findAll(){
         //Api restfull devolvendo 200 de conseguiu encontrar
         return ResponseEntity.ok(produtoService.findAll());
     }
 
     //GET /produtos/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<ProdutosModel> findById(@PathVariable String id){
+    public ResponseEntity<ProdutoResponseDTO> findById(@PathVariable String id){
         return ResponseEntity.ok(produtoService.findById(id));
     }
 
     //DELETE /produtos/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProdutosModel> delete(@PathVariable String id){
+    public ResponseEntity<ProdutoResponseDTO> delete(@PathVariable String id){
         produtoService.delete(id);
         //Status 204
         return ResponseEntity.noContent().build();
@@ -46,10 +48,10 @@ public class ProdutosController {
 
     //PUT /produtos/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutosModel> update(@PathVariable String id, @RequestBody ProdutosModel produtosModel){
+    public ResponseEntity<ProdutoResponseDTO> update(@PathVariable String id, @RequestBody ProdutoRequestDTO dto){
         try{
-            ProdutosModel produto = produtoService.update(id, produtosModel);
-            return ResponseEntity.ok(produto);
+            ProdutoResponseDTO produtoAtualizado = produtoService.update(id, dto);
+            return ResponseEntity.ok(produtoAtualizado);
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().build();
         }
