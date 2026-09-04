@@ -81,9 +81,13 @@ public class VendaService {
     }
 
     public void debitPointsFromUserBalance(Integer totalPontos, User usuarioLogado) {
-        Integer saldoAtualUsuario = usuarioLogado.getPontos() - totalPontos;
+        Integer saldoAtualUsuario = usuarioLogado.getPontos();
 
-        usuarioLogado.setPontos(saldoAtualUsuario);
+        if (totalPontos > saldoAtualUsuario) {
+            throw new RuntimeException("ERRO: Valor da compra excede o saldo do usuário!");
+        }
+
+        usuarioLogado.setPontos(saldoAtualUsuario - totalPontos);
 
         userRepository.save(usuarioLogado);
     }
