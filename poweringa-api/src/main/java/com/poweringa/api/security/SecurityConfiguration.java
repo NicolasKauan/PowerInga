@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/produtos/{id}").hasRole("GESTOR")
                         .requestMatchers(HttpMethod.GET, "/produtos").hasAnyRole("GESTOR","CLIENTE")
                         .requestMatchers(HttpMethod.GET, "/produtos/{id}").hasAnyRole("GESTOR", "CLIENTE")
+                        .requestMatchers(HttpMethod.PATCH, "/solicitacao/{id}/classificar").hasRole("GESTOR")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, AuthorizationFilter.class)
