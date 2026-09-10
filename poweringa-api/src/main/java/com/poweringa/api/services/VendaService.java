@@ -2,10 +2,10 @@ package com.poweringa.api.services;
 
 import com.poweringa.api.dtos.VendaCreateDTO;
 import com.poweringa.api.dtos.VendaItemCreateDTO;
+import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.ItensVenda;
-import com.poweringa.api.models.ProdutosModel;
 import com.poweringa.api.models.User;
 import com.poweringa.api.models.Venda;
 import com.poweringa.api.repositories.UserRepository;
@@ -65,13 +65,13 @@ public class VendaService {
         List<ItensVenda> itens = new ArrayList<>();
 
         for (VendaItemCreateDTO itemCreateDTO : dto.itens()) {
-            ProdutosModel produto = produtoService.findById(itemCreateDTO.idProduto());
+            ProdutoResponseDTO produto = produtoService.findById(itemCreateDTO.idProduto());
 
             ItensVenda itemVenda = new ItensVenda(
-                    produto.getId(),
-                    produto.getDescricao(),
+                    produto.id(),
+                    produto.descricao(),
                     itemCreateDTO.quantidade(),
-                    produto.getValorPontos() * itemCreateDTO.quantidade()
+                    produto.valorPontos() * itemCreateDTO.quantidade()
             );
 
             itens.add(itemVenda);
