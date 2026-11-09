@@ -4,6 +4,7 @@ import com.poweringa.api.dtos.ProdutoRequestDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.models.ProdutosModel;
 import com.poweringa.api.services.ProdutoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class ProdutosController {
 
     // POST /produtos
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> save(@RequestBody ProdutoRequestDTO dto){
+    public ResponseEntity<ProdutoResponseDTO> save(@RequestBody @Valid ProdutoRequestDTO dto){
         ProdutoResponseDTO produtoSalvo = produtoService.save(dto);
         //Retorna o status 201(Criado) e o produto salvo no corpo da resposta .body
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
@@ -48,12 +49,8 @@ public class ProdutosController {
 
     //PUT /produtos/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutoResponseDTO> update(@PathVariable String id, @RequestBody ProdutoRequestDTO dto){
-        try{
-            ProdutoResponseDTO produtoAtualizado = produtoService.update(id, dto);
-            return ResponseEntity.ok(produtoAtualizado);
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ProdutoResponseDTO> update(@PathVariable String id, @RequestBody @Valid ProdutoRequestDTO dto){
+        ProdutoResponseDTO produtoAtualizado = produtoService.update(id, dto);
+        return ResponseEntity.ok(produtoAtualizado);
     }
 }

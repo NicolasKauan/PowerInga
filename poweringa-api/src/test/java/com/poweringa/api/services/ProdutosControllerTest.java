@@ -2,6 +2,7 @@ package com.poweringa.api.controllers;
 
 import com.poweringa.api.dtos.ProdutoRequestDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
+import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.services.ProdutoService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,14 +82,11 @@ class ProdutosControllerTest {
     }
 
     @Test
-    void updateDeveRetornarStatusBadRequestQuandoDerErro() {
+    void updateDevePropagarResourceNotFoundQuandoProdutoNaoExistir() {
         ProdutoRequestDTO request = new ProdutoRequestDTO("Mesa Nova", 150);
-        // Simulando que o Service estourou um erro (id não encontrado, por exemplo)
-        when(produtoService.update("1", request)).thenThrow(new RuntimeException("Erro"));
+        when(produtoService.update("1", request)).thenThrow(new ResourceNotFound("ERRO: Produto não encontrado!"));
 
-        // O Controller tem um bloco try/catch para esse método, o catch vai devolver 400 Bad Request
-        ResponseEntity<ProdutoResponseDTO> response = produtosController.update("1", request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        // A exceção deve chegar ao GlobalExceptionHandler, que a converte em 404
+        assertThrows(ResourceNotFound.class, () -> produtosController.update("1", request));
     }
 }
