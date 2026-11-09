@@ -4,6 +4,7 @@ import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.dtos.SolicitacaoResponseDTO;
 import com.poweringa.api.models.User;
 import com.poweringa.api.services.SolicitacaoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,7 +30,7 @@ public class SolicitacaoController {
 
     @PostMapping
     public ResponseEntity<SolicitacaoResponseDTO> create(
-            @RequestBody SolicitacaoCreateDTO dto,
+            @RequestBody @Valid SolicitacaoCreateDTO dto,
             @AuthenticationPrincipal User usuarioLogado
     ) {
         return ResponseEntity.ok(solicitacaoService.create(dto, usuarioLogado));

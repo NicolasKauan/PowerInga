@@ -62,7 +62,9 @@ public class SolicitacaoService {
             throw new RuntimeException("ERRO: Solicitação já resolvida!");
         }
 
-        User usuarioDaSolicitacao = solicitacao.getUsuario();
+        // A solicitação guarda uma cópia do usuário feita na criação; o saldo atual precisa vir do banco.
+        User usuarioDaSolicitacao = userRepository.findById(solicitacao.getUsuario().getId())
+                .orElseThrow(() -> new ResourceNotFound("ERRO: Usuário da solicitação não foi encontrado!"));
 
         Integer novoSaldo = usuarioDaSolicitacao.getPontos() + solicitacao.getCategoria().getPontos();
 
