@@ -1,6 +1,6 @@
 package com.poweringa.api.controllers;
 
-import com.poweringa.api.models.User;
+import com.poweringa.api.dtos.UserResponseDTO;
 import com.poweringa.api.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<User>> findAll() {
+    public ResponseEntity<List<UserResponseDTO>> findAll() {
         return ResponseEntity.ok(userService.findAll());
     }
 }
