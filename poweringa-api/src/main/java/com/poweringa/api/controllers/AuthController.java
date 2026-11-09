@@ -4,6 +4,7 @@ import com.poweringa.api.dtos.LoginRequestDTO;
 import com.poweringa.api.dtos.LoginResponseDTO;
 import com.poweringa.api.dtos.RegisterRequestDTO;
 import com.poweringa.api.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO data) {
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO data) {
         authService.register(data);
 
         return ResponseEntity.ok("Usuário criado com sucesso!");
