@@ -2,6 +2,7 @@ package com.poweringa.api.services;
 
 import com.poweringa.api.dtos.ProdutoRequestDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
+import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.ProdutosModel;
 import com.poweringa.api.repositories.ProdutosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ProdutoService {
         ProdutosModel model = produtosRepository.findById(id)
                 //Como existe uma chance do ID não existir, temos esse
                 // filtro para o Java lançar um erro automático para o produto não encontrado
-                .orElseThrow( () -> new RuntimeException("Produto não encontrado!"));
+                .orElseThrow( () -> new ResourceNotFound("ERRO: Produto não encontrado!"));
         return toDTO(model);
     }
 
@@ -62,7 +63,7 @@ public class ProdutoService {
     //PUT /produtos/{id}
     public ProdutoResponseDTO update(String id, ProdutoRequestDTO dto){
         ProdutosModel model = produtosRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Produto não encontrado!"));//Mesma coisa do delete, verifica se existe. Se não existir, temos um erro personalizado para isso.
+                .orElseThrow(()-> new ResourceNotFound("ERRO: Produto não encontrado!"));//Mesma coisa do delete, verifica se existe. Se não existir, temos um erro personalizado para isso.
         model.setDescricao(dto.descricao());
         model.setValorPontos(dto.valorPontos());
         ProdutosModel produtoAtualizado = produtosRepository.save(model);
