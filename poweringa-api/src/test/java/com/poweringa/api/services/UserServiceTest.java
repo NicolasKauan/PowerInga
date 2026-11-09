@@ -1,5 +1,6 @@
 package com.poweringa.api.services;
 
+import com.poweringa.api.dtos.UserResponseDTO;
 import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.models.User;
 import com.poweringa.api.repositories.UserRepository;
@@ -31,10 +32,11 @@ class UserServiceTest {
         User user = new User("teste@email.com", "senha", UserRole.CLIENTE, "Desc");
         when(userRepository.findAll()).thenReturn(List.of(user));
 
-        List<User> resultado = userService.findAll();
+        List<UserResponseDTO> resultado = userService.findAll();
 
         assertEquals(1, resultado.size());
-        assertEquals("teste@email.com", resultado.get(0).getEmail());
+        assertEquals("teste@email.com", resultado.get(0).email());
+        assertEquals(UserRole.CLIENTE, resultado.get(0).cargo());
     }
 
     @Test
