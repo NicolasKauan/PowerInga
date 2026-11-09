@@ -67,11 +67,18 @@ public class VendaService {
         for (VendaItemCreateDTO itemCreateDTO : dto.itens()) {
             ProdutoResponseDTO produto = produtoService.findById(itemCreateDTO.idProduto());
 
+            // Produtos gravados antes da validação de ProdutoRequestDTO podem ter valor nulo ou negativo.
+            if (produto.valorPontos() == null || produto.valorPontos() <= 0) {
+                throw new IllegalStateException(
+                        "ERRO: Produto " + produto.id() + " possui valor em pontos inválido!"
+                );
+            }
+
             ItensVenda itemVenda = new ItensVenda(
                     produto.id(),
                     produto.descricao(),
                     itemCreateDTO.quantidade(),
-                    produto.valorPontos() * itemCreateDTO.quantidade()
+                    Math.multiplyExact(produto.valorPontos(), itemCreateDTO.quantidade())
             );
 
             itens.add(itemVenda);
@@ -96,7 +103,7 @@ public class VendaService {
         Integer totalPontosVenda = 0;
 
         for (ItensVenda itemVenda : itensVenda) {
-            totalPontosVenda += itemVenda.getTotalPontosItem();
+            totalPontosVenda = Math.addExact(totalPontosVenda, itemVenda.getTotalPontosItem());
         }
 
         return totalPontosVenda;
