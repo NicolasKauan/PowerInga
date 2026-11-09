@@ -3,6 +3,7 @@ package com.poweringa.api.services;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.dtos.VendaCreateDTO;
 import com.poweringa.api.dtos.VendaItemCreateDTO;
+import com.poweringa.api.dtos.VendaResponseDTO;
 import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.ItensVenda;
@@ -51,9 +52,11 @@ class VendaServiceTest {
         List<Venda> vendas = List.of(criarVenda(gestor));
         when(vendaRepository.findAll()).thenReturn(vendas);
 
-        List<Venda> resultado = vendaService.findAll(gestor);
+        List<VendaResponseDTO> resultado = vendaService.findAll(gestor);
 
-        assertSame(vendas, resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("venda-1", resultado.get(0).id());
+        assertEquals("gestor-1", resultado.get(0).id_usuario());
         verify(vendaRepository).findAll();
         verify(vendaRepository, never()).findByUsuario_Id(any());
     }
@@ -64,9 +67,10 @@ class VendaServiceTest {
         List<Venda> vendas = List.of(criarVenda(cliente));
         when(vendaRepository.findByUsuario_Id(cliente.getId())).thenReturn(vendas);
 
-        List<Venda> resultado = vendaService.findAll(cliente);
+        List<VendaResponseDTO> resultado = vendaService.findAll(cliente);
 
-        assertSame(vendas, resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("cliente-1", resultado.get(0).id_usuario());
         verify(vendaRepository).findByUsuario_Id("cliente-1");
         verify(vendaRepository, never()).findAll();
     }
@@ -77,9 +81,9 @@ class VendaServiceTest {
         Venda venda = criarVenda(gestor);
         when(vendaRepository.findById("venda-1")).thenReturn(Optional.of(venda));
 
-        Venda resultado = vendaService.findById("venda-1", gestor);
+        VendaResponseDTO resultado = vendaService.findById("venda-1", gestor);
 
-        assertSame(venda, resultado);
+        assertEquals("venda-1", resultado.id());
         verify(vendaRepository).findById("venda-1");
         verify(vendaRepository, never()).findByIdAndUsuario_Id(any(), any());
     }
@@ -90,9 +94,10 @@ class VendaServiceTest {
         Venda venda = criarVenda(cliente);
         when(vendaRepository.findByIdAndUsuario_Id("venda-1", "cliente-1")).thenReturn(Optional.of(venda));
 
-        Venda resultado = vendaService.findById("venda-1", cliente);
+        VendaResponseDTO resultado = vendaService.findById("venda-1", cliente);
 
-        assertSame(venda, resultado);
+        assertEquals("venda-1", resultado.id());
+        assertEquals("cliente-1", resultado.id_usuario());
         verify(vendaRepository).findByIdAndUsuario_Id("venda-1", "cliente-1");
         verify(vendaRepository, never()).findById(any());
     }
@@ -155,6 +160,58 @@ class VendaServiceTest {
     }
 
     @Test
+    void calculateSaleTotalPointsDeveLancarExcecaoQuandoSomaEstourarOLimiteDeInteger() {
+        List<ItensVenda> itens = List.of(
+                new ItensVenda("produto-1", "Camiseta", 1, Integer.MAX_VALUE),
+                new ItensVenda("produto-2", "Caneca", 1, 1)
+        );
+
+        assertThrows(ArithmeticException.class, () -> vendaService.calculateSaleTotalPoints(itens));
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoMultiplicacaoEstourarOLimiteDeInteger() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 0);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 300_000_000)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", 10));
+
+        assertThrows(ArithmeticException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(0, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoProdutoTiverValorNegativo() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 10);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 1)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", -100));
+
+        assertThrows(IllegalStateException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(10, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoProdutoTiverValorNulo() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 10);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 1)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", null));
+
+        assertThrows(IllegalStateException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(10, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
     void debitPointsFromUserBalanceDeveAtualizarESalvarSaldoQuandoHouverPontosSuficientes() {
         User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 100);
 
@@ -185,13 +242,14 @@ class VendaServiceTest {
         when(vendaRepository.save(any(Venda.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
         LocalDateTime antesDaVenda = LocalDateTime.now();
 
-        Venda resultado = vendaService.save(dto, cliente);
+        VendaResponseDTO resultado = vendaService.save(dto, cliente);
         LocalDateTime depoisDaVenda = LocalDateTime.now();
 
         ArgumentCaptor<Venda> vendaCaptor = ArgumentCaptor.forClass(Venda.class);
         verify(vendaRepository).save(vendaCaptor.capture());
         Venda vendaSalva = vendaCaptor.getValue();
-        assertSame(vendaSalva, resultado);
+        assertEquals("cliente-1", resultado.id_usuario());
+        assertEquals(60, resultado.totalPontosVenda());
         assertSame(cliente, vendaSalva.getUsuario());
         assertEquals(60, vendaSalva.getTotalPontosVenda());
         assertEquals(1, vendaSalva.getItens().size());
@@ -210,6 +268,8 @@ class VendaServiceTest {
     }
 
     private Venda criarVenda(User usuario) {
-        return new Venda(usuario, List.of(), 0, LocalDateTime.now());
+        Venda venda = new Venda(usuario, List.of(), 0, LocalDateTime.now());
+        venda.setId("venda-1");
+        return venda;
     }
 }

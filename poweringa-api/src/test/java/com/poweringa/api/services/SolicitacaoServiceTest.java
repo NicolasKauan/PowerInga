@@ -143,6 +143,7 @@ class SolicitacaoServiceTest {
         solicitacao.setId("sol-1");
 
         when(solicitacaoRepository.findById("sol-1")).thenReturn(Optional.of(solicitacao));
+        when(userRepository.findById("cliente-1")).thenReturn(Optional.of(cliente));
         when(solicitacaoRepository.save(any(Solicitacao.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
 
         SolicitacaoResponseDTO resultado = solicitacaoService.approve("sol-1");
@@ -152,6 +153,38 @@ class SolicitacaoServiceTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         assertEquals(25, captor.getValue().getPontos()); // 10 + 15 (MICRO_ACAO)
+    }
+
+    @Test
+    void approveDeveUsarSaldoAtualDoBancoENaoACopiaGuardadaNaSolicitacao() {
+        User copiaDoUsuarioNaCriacao = criarUsuario("cliente-1", UserRole.CLIENTE, 0);
+        User usuarioAtualNoBanco = criarUsuario("cliente-1", UserRole.CLIENTE, 100);
+        Solicitacao solicitacao = new Solicitacao("Descrição", CategoriaRecompensa.MICRO_ACAO, copiaDoUsuarioNaCriacao);
+        solicitacao.setId("sol-1");
+
+        when(solicitacaoRepository.findById("sol-1")).thenReturn(Optional.of(solicitacao));
+        when(userRepository.findById("cliente-1")).thenReturn(Optional.of(usuarioAtualNoBanco));
+        when(solicitacaoRepository.save(any(Solicitacao.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        solicitacaoService.approve("sol-1");
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals(115, captor.getValue().getPontos()); // 100 (saldo atual) + 15 (MICRO_ACAO)
+    }
+
+    @Test
+    void approveDeveLancarExcecaoQuandoUsuarioDaSolicitacaoNaoExistirMais() {
+        User cliente = criarUsuario("cliente-removido", UserRole.CLIENTE, 0);
+        Solicitacao solicitacao = new Solicitacao("Descrição", CategoriaRecompensa.MICRO_ACAO, cliente);
+        solicitacao.setId("sol-1");
+
+        when(solicitacaoRepository.findById("sol-1")).thenReturn(Optional.of(solicitacao));
+        when(userRepository.findById("cliente-removido")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFound.class, () -> solicitacaoService.approve("sol-1"));
+        verify(userRepository, never()).save(any());
+        verify(solicitacaoRepository, never()).save(any());
     }
 
     @Test

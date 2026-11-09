@@ -2,6 +2,7 @@ package com.poweringa.api.services;
 
 import com.poweringa.api.dtos.VendaCreateDTO;
 import com.poweringa.api.dtos.VendaItemCreateDTO;
+import com.poweringa.api.dtos.VendaResponseDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.exceptions.ResourceNotFound;
@@ -29,27 +30,33 @@ public class VendaService {
     @Autowired
     private ProdutoService produtoService;
 
-    public List<Venda> findAll(User usuarioLogado) {
+    public List<VendaResponseDTO> findAll(User usuarioLogado) {
         if (usuarioLogado.getCargo() == UserRole.GESTOR) {
-            return vendaRepository.findAll();
+            return vendaRepository.findAll()
+                    .stream()
+                    .map(this::toDTO)
+                    .toList();
         }
 
-        return vendaRepository.findByUsuario_Id(usuarioLogado.getId());
+        return vendaRepository.findByUsuario_Id(usuarioLogado.getId())
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public Venda findById(String id, User usuarioLogado) {
+    public VendaResponseDTO findById(String id, User usuarioLogado) {
         ResourceNotFound exception = new ResourceNotFound("ERRO: Venda com esse id não foi encontrada");
 
         if (usuarioLogado.getCargo() == UserRole.GESTOR) {
-            return vendaRepository.findById(id)
-                    .orElseThrow(() -> exception);
+            return toDTO(vendaRepository.findById(id)
+                    .orElseThrow(() -> exception));
         }
 
-        return vendaRepository.findByIdAndUsuario_Id(id, usuarioLogado.getId())
-                .orElseThrow(() -> exception);
+        return toDTO(vendaRepository.findByIdAndUsuario_Id(id, usuarioLogado.getId())
+                .orElseThrow(() -> exception));
     }
 
-    public Venda save(VendaCreateDTO dto, User usuarioLogado) {
+    public VendaResponseDTO save(VendaCreateDTO dto, User usuarioLogado) {
         List<ItensVenda> itensVenda = generateSaleItemsList(dto);
 
         Integer totalPontosVenda = calculateSaleTotalPoints(itensVenda);
@@ -58,7 +65,17 @@ public class VendaService {
 
         Venda venda = new Venda(usuarioLogado, itensVenda, totalPontosVenda, LocalDateTime.now());
 
-        return vendaRepository.save(venda);
+        return toDTO(vendaRepository.save(venda));
+    }
+
+    public VendaResponseDTO toDTO(Venda venda) {
+        return new VendaResponseDTO(
+                venda.getId(),
+                venda.getUsuario().getId(),
+                venda.getItens(),
+                venda.getTotalPontosVenda(),
+                venda.getCreated_at()
+        );
     }
 
     public List<ItensVenda> generateSaleItemsList(VendaCreateDTO dto){
@@ -67,11 +84,18 @@ public class VendaService {
         for (VendaItemCreateDTO itemCreateDTO : dto.itens()) {
             ProdutoResponseDTO produto = produtoService.findById(itemCreateDTO.idProduto());
 
+            // Produtos gravados antes da validação de ProdutoRequestDTO podem ter valor nulo ou negativo.
+            if (produto.valorPontos() == null || produto.valorPontos() <= 0) {
+                throw new IllegalStateException(
+                        "ERRO: Produto " + produto.id() + " possui valor em pontos inválido!"
+                );
+            }
+
             ItensVenda itemVenda = new ItensVenda(
                     produto.id(),
                     produto.descricao(),
                     itemCreateDTO.quantidade(),
-                    produto.valorPontos() * itemCreateDTO.quantidade()
+                    Math.multiplyExact(produto.valorPontos(), itemCreateDTO.quantidade())
             );
 
             itens.add(itemVenda);
@@ -96,7 +120,7 @@ public class VendaService {
         Integer totalPontosVenda = 0;
 
         for (ItensVenda itemVenda : itensVenda) {
-            totalPontosVenda += itemVenda.getTotalPontosItem();
+            totalPontosVenda = Math.addExact(totalPontosVenda, itemVenda.getTotalPontosItem());
         }
 
         return totalPontosVenda;
