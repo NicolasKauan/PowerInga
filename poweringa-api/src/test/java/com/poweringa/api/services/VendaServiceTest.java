@@ -155,6 +155,58 @@ class VendaServiceTest {
     }
 
     @Test
+    void calculateSaleTotalPointsDeveLancarExcecaoQuandoSomaEstourarOLimiteDeInteger() {
+        List<ItensVenda> itens = List.of(
+                new ItensVenda("produto-1", "Camiseta", 1, Integer.MAX_VALUE),
+                new ItensVenda("produto-2", "Caneca", 1, 1)
+        );
+
+        assertThrows(ArithmeticException.class, () -> vendaService.calculateSaleTotalPoints(itens));
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoMultiplicacaoEstourarOLimiteDeInteger() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 0);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 300_000_000)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", 10));
+
+        assertThrows(ArithmeticException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(0, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoProdutoTiverValorNegativo() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 10);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 1)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", -100));
+
+        assertThrows(IllegalStateException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(10, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
+    void saveNaoDeveRegistrarVendaQuandoProdutoTiverValorNulo() {
+        User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 10);
+        VendaCreateDTO dto = new VendaCreateDTO(List.of(new VendaItemCreateDTO("produto-1", 1)));
+        when(produtoService.findById("produto-1"))
+                .thenReturn(new ProdutoResponseDTO("produto-1", "Camiseta", null));
+
+        assertThrows(IllegalStateException.class, () -> vendaService.save(dto, cliente));
+
+        assertEquals(10, cliente.getPontos());
+        verify(userRepository, never()).save(any());
+        verify(vendaRepository, never()).save(any());
+    }
+
+    @Test
     void debitPointsFromUserBalanceDeveAtualizarESalvarSaldoQuandoHouverPontosSuficientes() {
         User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 100);
 
