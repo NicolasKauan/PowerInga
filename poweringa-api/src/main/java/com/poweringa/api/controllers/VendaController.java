@@ -1,8 +1,8 @@
 package com.poweringa.api.controllers;
 
 import com.poweringa.api.dtos.VendaCreateDTO;
+import com.poweringa.api.dtos.VendaResponseDTO;
 import com.poweringa.api.models.User;
-import com.poweringa.api.models.Venda;
 import com.poweringa.api.services.VendaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +19,17 @@ public class VendaController {
     private VendaService vendaService;
 
     @GetMapping
-    public ResponseEntity<List<Venda>> findAll(@AuthenticationPrincipal User usuarioLogado) {
+    public ResponseEntity<List<VendaResponseDTO>> findAll(@AuthenticationPrincipal User usuarioLogado) {
         return ResponseEntity.ok(vendaService.findAll(usuarioLogado));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Venda> findById(@PathVariable String id, @AuthenticationPrincipal User usuarioLogado) {
+    public ResponseEntity<VendaResponseDTO> findById(@PathVariable String id, @AuthenticationPrincipal User usuarioLogado) {
         return ResponseEntity.ok(vendaService.findById(id, usuarioLogado));
     }
 
     @PostMapping
-    public ResponseEntity<Venda> save(
+    public ResponseEntity<VendaResponseDTO> save(
             @RequestBody @Valid VendaCreateDTO dto,
             @AuthenticationPrincipal User usuarioLogado) {
         return ResponseEntity.ok(vendaService.save(dto, usuarioLogado));
