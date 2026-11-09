@@ -2,6 +2,7 @@ package com.poweringa.api.services;
 
 import com.poweringa.api.dtos.ProdutoRequestDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
+import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.ProdutosModel;
 import com.poweringa.api.repositories.ProdutosRepository;
 import org.junit.jupiter.api.Test;
@@ -54,8 +55,17 @@ class ProdutoServiceTest {
     void findByIdDeveLancarExcecaoQuandoNaoEncontrado() {
         when(produtosRepository.findById("id-invalido")).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> produtoService.findById("id-invalido"));
+        assertThrows(ResourceNotFound.class, () -> produtoService.findById("id-invalido"));
         verify(produtosRepository).findById("id-invalido");
+    }
+
+    @Test
+    void updateDeveLancarExcecaoQuandoNaoEncontrado() {
+        ProdutoRequestDTO requestDTO = new ProdutoRequestDTO("Bicicleta", 1000);
+        when(produtosRepository.findById("id-invalido")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFound.class, () -> produtoService.update("id-invalido", requestDTO));
+        verify(produtosRepository, never()).save(any(ProdutosModel.class));
     }
 
     @Test
