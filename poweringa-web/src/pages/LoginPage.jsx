@@ -1,4 +1,3 @@
-import React from "react";
 import Logo1 from "/Logo-1.png";
 import api from "../services/api";
 import { useForm } from "react-hook-form";
@@ -6,8 +5,12 @@ import { useNavigate } from "react-router-dom";
 
 import Swal from "sweetalert2";
 
+import { HOME_PATH_BY_ROLE } from "../constants/userRoles";
+import { useAuth } from "../contexts/AuthContext";
+
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const {
     register,
@@ -19,7 +22,7 @@ const LoginPage = () => {
     try {
       const response = await api.post("/auth/login", data);
 
-      localStorage.setItem("token", response.data.token);
+      const loggedUser = await login(response.data.token);
 
       const result = await Swal.fire({
         title: "Login bem sucedido!",
@@ -29,7 +32,7 @@ const LoginPage = () => {
       });
 
       if (result.isConfirmed) {
-        navigate("/home");
+        navigate(HOME_PATH_BY_ROLE[loggedUser.cargo]);
       }
     } catch (error) {
       console.log(error);
