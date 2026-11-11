@@ -2,12 +2,54 @@ import React from "react";
 import Logo1 from "/Logo-1.png";
 import api from "../services/api";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+
+import Swal from "sweetalert2";
 
 const LoginPage = () => {
-  const { register, handleSubmit } = useForm();
+  const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    alert("Login enviado!");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await api.post("/auth/login", data);
+
+      localStorage.setItem("token", response.data.token);
+
+      const result = await Swal.fire({
+        title: "Login bem sucedido!",
+        text: "Cadastro realizado com sucesso!",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      if (result.isConfirmed) {
+        navigate("/home");
+      }
+    } catch (error) {
+      console.log(error);
+
+      Swal.fire({
+        title: "Dados incorretos!",
+        text: "Seu usuário ou senha estão incorretos.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    }
+  };
+
+  const onError = () => {
+    Swal.fire({
+      title: "Erro no login!",
+      text: "Verifique se os campos estão preenchidos corretamente",
+      icon: "error",
+      confirmButtonText: "Ok",
+    });
   };
 
   return (
@@ -20,20 +62,22 @@ const LoginPage = () => {
         <h1 className="text-2xl font-bold">Faça seu login</h1>
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, onError)}
           className="flex flex-col gap-4 w-full sm:w-120 px-4"
         >
           <fieldset className="fieldset">
             <label className="text-black label" htmlFor="usuario">
-              Usuário
+              E-mail
             </label>
 
             <input
-              {...register("usuario")}
-              type="text"
-              id="usuario"
+              {...register("email", {
+                required: "O e-mail é obrigatório",
+              })}
+              type="email"
+              id="email"
               className="input w-full"
-              placeholder="Insira o seu usuário"
+              placeholder="Insira o seu e-mail"
             />
           </fieldset>
 
@@ -42,6 +86,9 @@ const LoginPage = () => {
               Senha
             </label>
             <input
+              {...register("senha", {
+                required: "A senha é obrigatória",
+              })}
               type="password"
               id="senha"
               className="input w-full"
