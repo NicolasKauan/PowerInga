@@ -13,10 +13,10 @@ Branch de trabalho: `feature/add-front-end`.
 | 1 | Base do front: token, autenticação, rotas protegidas, header | Concluída |
 | 2 | Correções do Login e tela de Cadastro | Concluída |
 | 3 | Home do usuário com saldo real | Concluída |
-| 4 | Lojinha e compra de produtos | Pendente |
-| 5 | Poste sua ação | Pendente |
-| 6 | Consultar andamento das solicitações | Pendente |
-| 7 | Painel do gestor (solicitações e usuários) | Pendente |
+| 4 | Lojinha e compra de produtos | Concluída |
+| 5 | Poste sua ação | Concluída |
+| 6 | Consultar andamento das solicitações | Concluída |
+| 7 | Painel do gestor (solicitações e usuários) | Concluída |
 
 ## Decisões tomadas
 
@@ -29,6 +29,47 @@ Branch de trabalho: `feature/add-front-end`.
 ---
 
 ## 12/11/2026
+
+> A partir da Etapa 3, a pedido do usuário (por causa do prazo), as decisões foram tomadas pelo assistente e registradas aqui. Vale revisar no PR.
+
+### Etapa 7: Painel do gestor
+
+- `/gestor`: uma home simples, com atalhos para Solicitações e Usuários.
+- `/gestor/solicitacoes`: a lista é separada em **Pendentes** e **Resolvidas**. Cada solicitação mostra o autor (nome e e-mail, cruzando com `GET /users`), a categoria e os pontos.
+  - As pendentes têm os botões Aprovar e Reprovar, com confirmação, que chamam `PATCH /solicitacoes/{id}/aprovar|reprovar`.
+  - Depois de cada decisão, a lista é recarregada, mesmo se der erro. Assim, se outro gestor já tiver resolvido a solicitação, a tela se corrige.
+- `/gestor/usuarios`: uma tabela com nome, e-mail, cargo e pontos (`GET /users`).
+- Para testar, é preciso ter um usuário com `cargo: "GESTOR"` no banco (o cadastro público só cria `CLIENTE`).
+
+### Etapas 5 e 6: Poste sua ação e Consultar andamento
+
+- `/acao`: um formulário com descrição e categoria. As categorias e os pontos espelham o enum `CategoriaRecompensa` da API (`constants/rewardCategories.js`). Se a API mudar os valores, este arquivo precisa acompanhar.
+- Depois do envio, o usuário vai para `/andamento`, com um aviso de sucesso.
+- `/andamento`: as solicitações do cliente, com a categoria, os pontos e o status ("Em análise", "Aprovada" ou "Reprovada").
+- `/ajuda`: uma explicação curta do fluxo e a tabela de pontos por categoria.
+- Os cards da Home agora são links de verdade, e o card inteiro é clicável.
+
+### Etapa 4: Lojinha
+
+- `/loja`: o saldo e os produtos de `GET /produtos`. Cada resgate compra **1 unidade** (`POST /vendas`), com confirmação.
+  - **Decisão:** sem carrinho, porque um item por vez cobre o uso real e é bem mais simples.
+- O botão fica desabilitado quando o saldo não é suficiente. A API continua sendo quem decide.
+- Depois do resgate, o saldo é atualizado. Se essa atualização falhar, o aviso de sucesso explica que o saldo exibido pode estar desatualizado.
+
+**API:** a correção abaixo foi necessária para esta etapa (commit `9b1e9be`).
+- Saldo insuficiente e "solicitação já resolvida" lançavam `RuntimeException` sem handler. A exceção caía na rota `/error`, que o Spring Security bloqueia, e o front recebia **403 sem mensagem**, como se fosse falta de permissão.
+- Foi criada a `BusinessRuleViolation`, tratada no `GlobalExceptionHandler` com **422** e a mensagem.
+
+**Peças compartilhadas do front**, criadas para não repetir código nas 6 telas novas:
+- `PageLayout`: o Header e o fundo cinza.
+- `BalanceCard`: o card de saldo, que se atualiza ao aparecer. Saiu da Home.
+- `ShortcutCard`: os cards de atalho.
+- `RequestFeedback`: os estados de carregando e de erro.
+- `useApiGet`: o hook de busca, com `reload`. Ele ignora respostas que chegam depois de o componente sair da tela.
+- `getApiErrorMessage`: traduz os erros da API (texto ou lista). O cadastro passou a usá-lo.
+- `formatPoints`: a formatação de pontos no padrão pt-BR.
+- O logo do Header agora leva de volta para a home do cargo.
+- O `npm run lint` voltou a passar sem erros: o erro antigo do `UserStorePage.jsx` sumiu com a reescrita da página.
 
 ### Etapa 3: Home com saldo real
 
