@@ -4,26 +4,17 @@ import Swal from "sweetalert2";
 
 import AuthLayout from "../components/AuthLayout";
 import FormField from "../components/FormField";
-import api, { CONNECTION_ERROR_MESSAGE } from "../services/api";
+import api from "../services/api";
+import { getApiErrorMessage } from "../services/apiErrorMessage";
 
-const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_CONFLICT = 409;
 
 const getRegisterErrorMessage = (error) => {
-  if (!error.response) {
-    return CONNECTION_ERROR_MESSAGE;
-  }
-
-  if (error.response.status === HTTP_STATUS_CONFLICT) {
+  if (error.response?.status === HTTP_STATUS_CONFLICT) {
     return "Já existe uma conta com esse e-mail.";
   }
 
-  // A API responde 400 com a lista de mensagens de validação do RegisterRequestDTO.
-  if (error.response.status === HTTP_STATUS_BAD_REQUEST && Array.isArray(error.response.data)) {
-    return error.response.data.join(" ");
-  }
-
-  return "Ocorreu um erro inesperado. Tente novamente.";
+  return getApiErrorMessage(error);
 };
 
 const RegisterPage = () => {
