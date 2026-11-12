@@ -11,8 +11,8 @@ Branch de trabalho: `feature/add-front-end`.
 |---|---|---|
 | 0 | Ajustes na API para o front (`/users/me`, CORS) | Concluída |
 | 1 | Base do front: token, autenticação, rotas protegidas, header | Concluída |
-| 2 | Correções do Login e tela de Cadastro | Em andamento |
-| 3 | Home do usuário com saldo real | Pendente |
+| 2 | Correções do Login e tela de Cadastro | Concluída |
+| 3 | Home do usuário com saldo real | Concluída |
 | 4 | Lojinha e compra de produtos | Pendente |
 | 5 | Poste sua ação | Pendente |
 | 6 | Consultar andamento das solicitações | Pendente |
@@ -30,7 +30,15 @@ Branch de trabalho: `feature/add-front-end`.
 
 ## 12/11/2026
 
-### Etapa 2: tela de Cadastro (sem commit; falta o teste no navegador)
+### Etapa 3: Home com saldo real
+
+- O card "Saldo" mostra os pontos reais do usuário (`pontos`, vindo de `GET /users/me`), no formato do pt-BR (ex.: **1.250**), com o rótulo "pontos". Antes, o valor `$34.90` era fixo.
+- Toda vez que a Home abre, ela chama o `refreshUser()` do `AuthProvider`.
+  - **Motivo:** o saldo muda fora da sessão do cliente (quando um gestor aprova uma ação). Sem isso, o cliente veria um saldo velho até recarregar a página.
+  - Enquanto a resposta não chega, a tela mostra o último saldo conhecido. Se a atualização falhar, mantém o valor e avisa "Não foi possível atualizar o saldo agora."
+- Decisões tomadas pelo assistente, a pedido do usuário, para acelerar a entrega.
+
+### Etapa 2: tela de Cadastro (commit `a19fb65`)
 
 - Nova página `RegisterPage` na rota pública `/cadastro`, com o mesmo layout do Login (`AuthLayout` + `FormField`).
 - Campos: Nome (`descricao`), E-mail, Senha e Confirmar senha. A confirmação é validada só no front e não é enviada para a API.

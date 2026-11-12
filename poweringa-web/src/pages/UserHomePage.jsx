@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { BsLightningCharge } from "react-icons/bs";
 import { IoStorefrontOutline } from "react-icons/io5";
@@ -5,8 +6,20 @@ import { IoIosHelpCircleOutline } from "react-icons/io";
 import { NavLink } from "react-router-dom";
 
 import Header from "../components/Header";
+import { useAuth } from "../contexts/AuthContext";
+
+const pointsFormatter = new Intl.NumberFormat("pt-BR");
 
 const UserHomePage = () => {
+  const { user, refreshUser } = useAuth();
+  const [hasBalanceRefreshFailed, setHasBalanceRefreshFailed] = useState(false);
+
+  // O saldo muda fora desta sessão (um gestor aprova uma ação), então é buscado de novo a cada visita.
+  // Enquanto a resposta não chega, a tela mostra o último saldo conhecido.
+  useEffect(() => {
+    refreshUser().catch(() => setHasBalanceRefreshFailed(true));
+  }, [refreshUser]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -16,7 +29,12 @@ const UserHomePage = () => {
           <div className="card bg-base-100 w-full shadow-sm">
             <div className="card-body items-center">
               <h3 className="text-2xl">Saldo</h3>
-              <p className="text-center font-semibold text-4xl">$34.90</p>
+              <p className="text-center font-semibold text-4xl">{pointsFormatter.format(user.pontos)}</p>
+              <p className="text-base-content/70">pontos</p>
+
+              {hasBalanceRefreshFailed && (
+                <p className="text-sm text-warning">Não foi possível atualizar o saldo agora.</p>
+              )}
             </div>
           </div>
 
