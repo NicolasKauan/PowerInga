@@ -1,5 +1,6 @@
 package com.poweringa.api.services;
 
+import com.poweringa.api.exceptions.BusinessRuleViolation;
 import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.dtos.SolicitacaoResponseDTO;
 import com.poweringa.api.enums.CategoriaRecompensa;
@@ -204,7 +205,7 @@ class SolicitacaoServiceTest {
 
         when(solicitacaoRepository.findById("sol-1")).thenReturn(Optional.of(solicitacao));
 
-        assertThrows(RuntimeException.class, () -> solicitacaoService.approve("sol-1"));
+        assertThrows(BusinessRuleViolation.class, () -> solicitacaoService.approve("sol-1"));
         verify(userRepository, never()).save(any());
     }
 
@@ -240,6 +241,6 @@ class SolicitacaoServiceTest {
 
         when(solicitacaoRepository.findById("sol-1")).thenReturn(Optional.of(solicitacao));
 
-        assertThrows(RuntimeException.class, () -> solicitacaoService.reject("sol-1"));
+        assertThrows(BusinessRuleViolation.class, () -> solicitacaoService.reject("sol-1"));
     }
 }
