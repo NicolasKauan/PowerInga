@@ -8,6 +8,7 @@ import com.poweringa.api.models.User;
 import com.poweringa.api.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -58,20 +59,23 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerDeveCriarUsuarioQuandoEmailNaoExistir() {
-        RegisterRequestDTO registerRequest = new RegisterRequestDTO("novo@email.com", "senha123", "Novo User", UserRole.CLIENTE);
+    void registerDeveCriarUsuarioComCargoClienteQuandoEmailNaoExistir() {
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO("novo@email.com", "senha123", "Novo User");
 
         when(userRepository.existsByEmail("novo@email.com")).thenReturn(false);
         when(passwordEncoder.encode("senha123")).thenReturn("senhaCriptografada");
 
         authService.register(registerRequest);
 
-        verify(userRepository).save(any(User.class));
+        ArgumentCaptor<User> usuarioSalvo = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(usuarioSalvo.capture());
+        assertEquals(UserRole.CLIENTE, usuarioSalvo.getValue().getCargo());
+        assertEquals("senhaCriptografada", usuarioSalvo.getValue().getSenha());
     }
 
     @Test
     void registerDeveLancarExcecaoQuandoEmailJaExistir() {
-        RegisterRequestDTO registerRequest = new RegisterRequestDTO("existente@email.com", "senha123", "User Existente", UserRole.CLIENTE);
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO("existente@email.com", "senha123", "User Existente");
 
         when(userRepository.existsByEmail("existente@email.com")).thenReturn(true);
 

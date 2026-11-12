@@ -1,10 +1,9 @@
 package com.poweringa.api.dtos;
 
-import com.poweringa.api.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
+// O cargo não vem do cliente: o cadastro público sempre cria CLIENTE (ver AuthService.register).
 public record RegisterRequestDTO(
         @NotBlank(message = "ERRO: E-mail é obrigatório!")
         @Email(message = "ERRO: E-mail inválido!")
@@ -13,9 +12,7 @@ public record RegisterRequestDTO(
         @NotBlank(message = "ERRO: Senha é obrigatória!")
         String senha,
 
-        String descricao,
-
-        @NotNull(message = "ERRO: Cargo é obrigatório!")
-        UserRole cargo
+        @NotBlank(message = "ERRO: Nome é obrigatório!")
+        String descricao
 ) {
 }

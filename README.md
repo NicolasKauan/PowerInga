@@ -257,10 +257,11 @@ Authorization: Bearer <token>
 {
   "email": "cliente@email.com",
   "senha": "123456",
-  "descricao": "Cliente da plataforma",
-  "cargo": "CLIENTE"
+  "descricao": "Maria Silva"
 }
 ```
+
+O cadastro público sempre cria usuários com cargo `CLIENTE`. Usuários `GESTOR` devem ser criados diretamente no banco.
 
 ### Login
 
