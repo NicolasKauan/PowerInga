@@ -160,12 +160,32 @@ spring.mongodb.host=localhost
 spring.mongodb.port=27017
 spring.mongodb.database=poweringa_db
 
-api.security.token.secret-key=my-secret-key
+api.security.token.secret-key=${JWT_SECRET_KEY:}
+spring.config.import=optional:file:.env[.properties]
 ```
+
+### Chave do JWT (obrigatória)
+
+A chave que assina os tokens **não fica no repositório**. Cada pessoa define a sua na variável `JWT_SECRET_KEY`, com pelo menos 32 caracteres. Sem ela, ou com uma chave mais curta, a API se recusa a iniciar e explica o motivo.
+
+1. Dentro de `poweringa-api/`, copie o [.env.example](poweringa-api/.env.example) para `.env`. O `.env` está no `.gitignore` e nunca deve ser commitado.
+2. Gere uma chave aleatória e coloque-a no `.env`, no lugar do valor de exemplo:
+   - PowerShell: `$b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)`
+   - Linux/macOS: `openssl rand -base64 48`
+
+O `.env` é lido em relação à pasta onde a API é iniciada:
+
+- `./mvnw spring-boot:run` dentro de `poweringa-api/`: funciona sem ajuste.
+- Botão "Run" do VS Code com a raiz do repositório aberta: o padrão é rodar a partir da raiz, então o `.env` não é encontrado. Adicione `"cwd": "${workspaceFolder}/poweringa-api"` à configuração em `.vscode/launch.json`.
+
+Uma variável de ambiente `JWT_SECRET_KEY` definida no sistema tem prioridade sobre o `.env`. Em produção, use a variável real.
+
+> Trocar a chave invalida todos os tokens já emitidos, e os usuários precisam fazer login de novo.
 
 ### Pré-requisitos
 
 - Java 17+
+- Arquivo `poweringa-api/.env` com a `JWT_SECRET_KEY` (ver a seção acima)
 - MongoDB rodando localmente em `localhost:27017`
 - A database `poweringa_db` deve existir ou ser criada automaticamente conforme a configuração do Spring Data
 
