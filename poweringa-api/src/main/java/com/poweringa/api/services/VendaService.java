@@ -5,6 +5,7 @@ import com.poweringa.api.dtos.VendaItemCreateDTO;
 import com.poweringa.api.dtos.VendaResponseDTO;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.enums.UserRole;
+import com.poweringa.api.exceptions.BusinessRuleViolation;
 import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.ItensVenda;
 import com.poweringa.api.models.User;
@@ -108,7 +109,7 @@ public class VendaService {
         Integer saldoAtualUsuario = usuarioLogado.getPontos();
 
         if (totalPontos > saldoAtualUsuario) {
-            throw new RuntimeException("ERRO: Valor da compra excede o saldo do usuário!");
+            throw new BusinessRuleViolation("ERRO: Valor da compra excede o saldo do usuário!");
         }
 
         usuarioLogado.setPontos(saldoAtualUsuario - totalPontos);
