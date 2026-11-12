@@ -1,12 +1,12 @@
-import Logo1 from "/Logo-1.png";
-import api from "../services/api";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
+import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
 import { HOME_PATH_BY_ROLE } from "../constants/userRoles";
 import { useAuth } from "../contexts/AuthContext";
+import api, { CONNECTION_ERROR_MESSAGE } from "../services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,97 +15,63 @@ const LoginPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (credentials) => {
     try {
-      const response = await api.post("/auth/login", data);
-
+      const response = await api.post("/auth/login", credentials);
       const loggedUser = await login(response.data.token);
 
-      const result = await Swal.fire({
-        title: "Login bem sucedido!",
-        text: "Cadastro realizado com sucesso!",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
-
-      if (result.isConfirmed) {
-        navigate(HOME_PATH_BY_ROLE[loggedUser.cargo]);
-      }
+      navigate(HOME_PATH_BY_ROLE[loggedUser.cargo]);
     } catch (error) {
-      console.log(error);
-
       Swal.fire({
-        title: "Dados incorretos!",
-        text: "Seu usuário ou senha estão incorretos.",
+        title: "Não foi possível entrar",
+        text: error.response
+          ? "Seu e-mail ou senha estão incorretos."
+          : CONNECTION_ERROR_MESSAGE,
         icon: "error",
         confirmButtonText: "Ok",
       });
     }
   };
 
-  const onError = () => {
-    Swal.fire({
-      title: "Erro no login!",
-      text: "Verifique se os campos estão preenchidos corretamente",
-      icon: "error",
-      confirmButtonText: "Ok",
-    });
-  };
-
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col items-center justify-center green-background">
-        <img className="w-90 h-90" src={Logo1} alt="logo-1" />
-      </div>
+    <AuthLayout title="Faça seu login">
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4 w-full sm:w-120 px-4"
+      >
+        <FormField
+          id="email"
+          label="E-mail"
+          type="email"
+          placeholder="Insira o seu e-mail"
+          error={errors.email}
+          {...register("email", { required: "O e-mail é obrigatório." })}
+        />
 
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Faça seu login</h1>
+        <FormField
+          id="senha"
+          label="Senha"
+          type="password"
+          placeholder="Insira a sua senha"
+          error={errors.senha}
+          {...register("senha", { required: "A senha é obrigatória." })}
+        />
 
-        <form
-          onSubmit={handleSubmit(onSubmit, onError)}
-          className="flex flex-col gap-4 w-full sm:w-120 px-4"
-        >
-          <fieldset className="fieldset">
-            <label className="text-black label" htmlFor="usuario">
-              E-mail
-            </label>
+        <div className="flex flex-col gap-2">
+          <button type="submit" className="btn btn-neutral" disabled={isSubmitting}>
+            Entrar
+          </button>
 
-            <input
-              {...register("email", {
-                required: "O e-mail é obrigatório",
-              })}
-              type="email"
-              id="email"
-              className="input w-full"
-              placeholder="Insira o seu e-mail"
-            />
-          </fieldset>
-
-          <fieldset className="fieldset">
-            <label className="text-black label" htmlFor="senha">
-              Senha
-            </label>
-            <input
-              {...register("senha", {
-                required: "A senha é obrigatória",
-              })}
-              type="password"
-              id="senha"
-              className="input w-full"
-              placeholder="Insira a sua senha"
-            />
-          </fieldset>
-
-          <div className="flex flex-col gap-2">
-            <button className="btn btn-neutral">Entrar</button>
-            <button className="btn">Criar uma conta</button>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Link to="/cadastro" className="btn">
+            Criar uma conta
+          </Link>
+        </div>
+      </form>
+    </AuthLayout>
   );
 };
 
