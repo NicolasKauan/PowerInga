@@ -8,3 +8,8 @@ export const HOME_PATH_BY_ROLE = {
   [USER_ROLES.CLIENTE]: "/home",
   [USER_ROLES.GESTOR]: "/gestor",
 };
+
+export const ROLE_LABELS = {
+  [USER_ROLES.CLIENTE]: "Cliente",
+  [USER_ROLES.GESTOR]: "Gestor",
+};

@@ -4,6 +4,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { USER_ROLES } from "./constants/userRoles";
 import AuthProvider from "./contexts/AuthProvider";
 import LoginPage from "./pages/LoginPage";
+import ManagerHomePage from "./pages/ManagerHomePage";
+import ManagerRequestsPage from "./pages/ManagerRequestsPage";
+import ManagerUsersPage from "./pages/ManagerUsersPage";
 import RegisterPage from "./pages/RegisterPage";
 import UserHelpPage from "./pages/UserHelpPage";
 import UserHomePage from "./pages/UserHomePage";
@@ -29,6 +32,11 @@ const App = () => {
             <Route path="/ajuda" element={<UserHelpPage />} />
           </Route>
 
+          <Route element={<ProtectedRoute allowedRoles={[USER_ROLES.GESTOR]} />}>
+            <Route path="/gestor" element={<ManagerHomePage />} />
+            <Route path="/gestor/solicitacoes" element={<ManagerRequestsPage />} />
+            <Route path="/gestor/usuarios" element={<ManagerUsersPage />} />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>
