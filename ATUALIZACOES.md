@@ -30,6 +30,13 @@ Branch de trabalho: `feature/add-front-end`.
 
 ## 12/11/2026
 
+### Segurança: chave do JWT fora do repositório (PR #19, commit `30fc712`)
+
+- A chave que assina os tokens estava escrita no `application.properties` e no README. Ela passou a vir da variável `JWT_SECRET_KEY`, lida de um `poweringa-api/.env` local (ignorado pelo git) ou do sistema.
+- A API **se recusa a iniciar** sem a chave ou com uma chave menor que 32 caracteres (`JwtProperties` com `@Validated`).
+- **Ação de cada pessoa:** copiar o `.env.example` para `.env` e gerar a própria chave (o comando está no arquivo). Quem roda pelo VS Code precisa de `"cwd": "${workspaceFolder}/poweringa-api"` no `launch.json`.
+- Os tokens antigos deixaram de valer, e é preciso fazer login de novo.
+
 > A partir da Etapa 3, a pedido do usuário (por causa do prazo), as decisões foram tomadas pelo assistente e registradas aqui. Vale revisar no PR.
 
 ### Etapa 7: Painel do gestor
