@@ -6,13 +6,24 @@ Estas instruções valem para todo o repositório PowerInga. O projeto é acadê
 
 ## Estado atual do projeto
 
-- A aplicação está em `poweringa-api/`.
-- Backend em Java 17 com Spring Boot 4.1.0 e Maven Wrapper.
-- Pacote-base: `com.poweringa.nika`.
-- A configuração atual contém apenas `spring.application.name=nika`.
-- O `pom.xml` inclui Spring MVC, Security, JPA, MongoDB e Lombok.
-- A escolha e a configuração efetiva da persistência ainda não estão definidas. Não suponha que JPA e MongoDB serão usados juntos; confirme a decisão antes de criar entidades, documentos, repositories ou configurações de banco.
-- O projeto ainda não possui domínio, endpoints ou arquitetura de camadas consolidados. Não invente padrões complexos antecipadamente.
+- O repositório tem duas aplicações: a API em `poweringa-api/` e o front-end em `poweringa-web/`.
+
+### API (`poweringa-api/`)
+
+- Java 17 com Spring Boot 4.1.0 e Maven Wrapper.
+- Pacote-base: `com.poweringa.api`.
+- Persistência: MongoDB (`spring-boot-starter-data-mongodb`), configurado em `application.properties` para `localhost:27017`, banco `poweringa_db`. O projeto não usa JPA.
+- Autenticação com Spring Security e JWT (`com.auth0:java-jwt`). Os cargos são `CLIENTE` e `GESTOR`.
+- Documentação com springdoc-openapi (Swagger UI em `/swagger-ui.html`).
+- Validação com `spring-boot-starter-validation`; erros tratados em `handlers/GlobalExceptionHandler`.
+- Organização em camadas: `controllers`, `services`, `repositories`, `models`, `dtos`, `enums`, `exceptions`, `handlers`, `security` e `config`.
+- Domínio atual: autenticação e usuários, produtos, vendas e solicitações. Siga a organização existente e não invente padrões complexos antecipadamente.
+
+### Front-end (`poweringa-web/`)
+
+- React 19 com Vite 8, Tailwind CSS 4 e daisyUI 5.
+- Rotas com `react-router-dom`, formulários com `react-hook-form`, requisições com `axios` (`src/services/api.jsx`) e alertas com `sweetalert2`.
+- Comandos: `npm run dev`, `npm run build` e `npm run lint`.
 
 ## Forma de trabalho
 
@@ -44,7 +55,7 @@ Em trabalhos maiores, divida a implementação em partes compreensíveis e infor
 ## Convenções de implementação
 
 - Siga os padrões já presentes no projeto e mantenha o código compatível com Java 17.
-- Mantenha classes sob o pacote-base `com.poweringa.nika`, organizando subpacotes por responsabilidade ou funcionalidade conforme a estrutura evoluir.
+- Mantenha classes sob o pacote-base `com.poweringa.api`, organizando subpacotes por responsabilidade ou funcionalidade conforme a estrutura evoluir.
 - Use injeção por construtor. Evite injeção direta em campos.
 - Mantenha controllers focados no protocolo HTTP, regras de negócio fora dos controllers e acesso a dados isolado em repositories.
 - Use DTOs nos limites da API quando houver entrada ou saída HTTP; não exponha entidades de persistência automaticamente.
@@ -52,7 +63,7 @@ Em trabalhos maiores, divida a implementação em partes compreensíveis e infor
 - Nunca inclua senhas, tokens, chaves ou credenciais no repositório. Use variáveis de ambiente ou configuração externa e forneça exemplos seguros quando necessário.
 - Não altere versões ou adicione bibliotecas sem justificar a necessidade e obter aprovação quando houver impacto relevante.
 - Lombok está disponível, mas use-o apenas quando melhorar a legibilidade; não o aplique indiscriminadamente.
-- Antes de usar JPA ou MongoDB, confirme qual tecnologia atende à funcionalidade solicitada e remova duplicidades de dependências apenas em uma tarefa explicitamente aprovada para isso.
+- A persistência é feita com MongoDB. Não adicione JPA ou outra tecnologia de banco sem aprovação.
 
 ## Testes e validação
 
