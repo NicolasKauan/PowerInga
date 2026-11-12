@@ -1,12 +1,13 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo5 from "/Logo-5.png";
 import UserPhoto from "/UserPhoto.png";
 
+import { HOME_PATH_BY_ROLE } from "../constants/userRoles";
 import { useAuth } from "../contexts/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -15,7 +16,9 @@ const Header = () => {
 
   return (
     <header className="green-background flex justify-between items-center p-4">
-      <img src={Logo5} alt="Logo PowerInga" />
+      <Link to={HOME_PATH_BY_ROLE[user.cargo]}>
+        <img src={Logo5} alt="Logo PowerInga - voltar para o início" />
+      </Link>
 
       <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="cursor-pointer">
