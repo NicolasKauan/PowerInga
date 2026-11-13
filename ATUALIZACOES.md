@@ -28,6 +28,15 @@ Branch de trabalho: `feature/add-front-end`.
 
 ---
 
+## 13/11/2026
+
+### Integração da main (antes do PR para a main)
+
+- A `main` tinha um commit do João (`5f63e89`) que também atualizava o AGENTS.md, e o merge deu conflito nesse arquivo.
+- **Resolução:** ficou a estrutura desta branch (seções API e Front-end), com dois acréscimos do João: a regra dos testes (JUnit 5, Mockito e JaCoCo com 70% de cobertura em `services`, checado no `mvnw verify`) e a redação dele para a regra de persistência. A frase dele sobre a chave do JWT ficar no `application.properties` foi trocada, porque isso deixou de ser verdade com o PR #19.
+- Verificado com `mvnw clean verify` (67 testes, cobertura atendida), `npm run lint` e `npm run build`.
+- Roteiro da API seguindo o fluxo do front: 40 de 40 cenários OK. Achado pendente: um JSON ilegível (malformado ou com categoria inexistente) volta como 403 sem corpo, em vez de 400. O front não é afetado.
+
 ## 12/11/2026
 
 ### Segurança: chave do JWT fora do repositório (PR #19, commit `30fc712`)
