@@ -14,10 +14,12 @@ Estas instruções valem para todo o repositório PowerInga. O projeto é acadê
 - Pacote-base: `com.poweringa.api`.
 - Persistência: MongoDB (`spring-boot-starter-data-mongodb`), configurado em `application.properties` para `localhost:27017`, banco `poweringa_db`. O projeto não usa JPA.
 - Autenticação com Spring Security e JWT (`com.auth0:java-jwt`). Os cargos são `CLIENTE` e `GESTOR`.
+- A chave do JWT não fica no repositório: vem da variável `JWT_SECRET_KEY` (arquivo `poweringa-api/.env` local, ver `.env.example`). Sem ela, ou com menos de 32 caracteres, a API não inicia.
 - Documentação com springdoc-openapi (Swagger UI em `/swagger-ui.html`).
 - Validação com `spring-boot-starter-validation`; erros tratados em `handlers/GlobalExceptionHandler`.
 - Organização em camadas: `controllers`, `services`, `repositories`, `models`, `dtos`, `enums`, `exceptions`, `handlers`, `security` e `config`.
 - Domínio atual: autenticação e usuários, produtos, vendas e solicitações. Siga a organização existente e não invente padrões complexos antecipadamente.
+- Os testes são unitários (JUnit 5 e Mockito). O JaCoCo exige no mínimo 70% de cobertura de linhas no pacote `services`, verificado no `mvnw verify`.
 
 ### Front-end (`poweringa-web/`)
 
@@ -63,7 +65,7 @@ Em trabalhos maiores, divida a implementação em partes compreensíveis e infor
 - Nunca inclua senhas, tokens, chaves ou credenciais no repositório. Use variáveis de ambiente ou configuração externa e forneça exemplos seguros quando necessário.
 - Não altere versões ou adicione bibliotecas sem justificar a necessidade e obter aprovação quando houver impacto relevante.
 - Lombok está disponível, mas use-o apenas quando melhorar a legibilidade; não o aplique indiscriminadamente.
-- A persistência é feita com MongoDB. Não adicione JPA ou outra tecnologia de banco sem aprovação.
+- A persistência do projeto é MongoDB. Antes de usar outra tecnologia de persistência (como JPA), confirme a decisão com o usuário.
 
 ## Testes e validação
 
