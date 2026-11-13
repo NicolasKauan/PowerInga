@@ -4,6 +4,7 @@ import com.poweringa.api.dtos.SolicitacaoCreateDTO;
 import com.poweringa.api.dtos.SolicitacaoResponseDTO;
 import com.poweringa.api.enums.SolicitacaoStatus;
 import com.poweringa.api.enums.UserRole;
+import com.poweringa.api.exceptions.BusinessRuleViolation;
 import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.models.Solicitacao;
 import com.poweringa.api.models.User;
@@ -59,7 +60,7 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));
 
         if (solicitacao.getStatus() != SolicitacaoStatus.PENDENTE) {
-            throw new RuntimeException("ERRO: Solicitação já resolvida!");
+            throw new BusinessRuleViolation("ERRO: Solicitação já resolvida!");
         }
 
         // A solicitação guarda uma cópia do usuário feita na criação; o saldo atual precisa vir do banco.
@@ -82,7 +83,7 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new ResourceNotFound("ERRO: Solicitação com esse id não foi encontrada!"));
 
         if (solicitacao.getStatus() != SolicitacaoStatus.PENDENTE) {
-            throw new RuntimeException("ERRO: Solicitação já resolvida!");
+            throw new BusinessRuleViolation("ERRO: Solicitação já resolvida!");
         }
 
         solicitacao.setStatus(SolicitacaoStatus.REPROVADO);

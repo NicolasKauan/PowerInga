@@ -1,5 +1,6 @@
 package com.poweringa.api.handlers;
 
+import com.poweringa.api.exceptions.BusinessRuleViolation;
 import com.poweringa.api.exceptions.ResourceNotFound;
 import com.poweringa.api.exceptions.UserAlreadyExists;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFound.class)
     public ResponseEntity<String> handleResourceNotFound(Exception exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
+    }
+
+    // Sem este handler, a exceção cairia no /error, que o Spring Security bloqueia: o cliente receberia 403 sem mensagem.
+    @ExceptionHandler(BusinessRuleViolation.class)
+    public ResponseEntity<String> handleBusinessRuleViolation(Exception exception) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

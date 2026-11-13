@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.poweringa.api.dtos.LoginRequestDTO;
 import com.poweringa.api.dtos.RegisterRequestDTO;
+import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.exceptions.UserAlreadyExists;
 import com.poweringa.api.models.User;
 import com.poweringa.api.repositories.UserRepository;
@@ -46,15 +47,13 @@ public class AuthService {
     }
 
     public void register(RegisterRequestDTO data) {
-        System.out.println(data.email());
-
         if (userRepository.existsByEmail(data.email())) {
             throw new UserAlreadyExists();
         }
 
         String encryptedPassword = passwordEncoder.encode(data.senha());
 
-        User newUser = new User(data.email(), encryptedPassword, data.cargo(), data.descricao());
+        User newUser = new User(data.email(), encryptedPassword, UserRole.CLIENTE, data.descricao());
 
         userRepository.save(newUser);
     }

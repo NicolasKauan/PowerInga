@@ -6,15 +6,26 @@ Estas instruções valem para todo o repositório PowerInga. O projeto é acadê
 
 ## Estado atual do projeto
 
-- A aplicação está em `poweringa-api/`.
-- Backend em Java 17 com Spring Boot 4.1.0 e Maven Wrapper.
+- O repositório tem duas aplicações: a API em `poweringa-api/` e o front-end em `poweringa-web/`.
+
+### API (`poweringa-api/`)
+
+- Java 17 com Spring Boot 4.1.0 e Maven Wrapper.
 - Pacote-base: `com.poweringa.api`.
-- A configuração atual contém `spring.application.name=api`, a conexão com o MongoDB (`localhost:27017`, banco `poweringa_db`) e a chave do JWT (`api.security.token.secret-key`).
-- O `pom.xml` inclui Spring MVC, Security, Validation, MongoDB, JWT (`java-jwt`), Springdoc OpenAPI (Swagger) e Lombok.
-- A persistência é feita com MongoDB (Spring Data MongoDB). Não use JPA nem adicione outro banco sem antes confirmar a decisão.
-- O projeto já possui domínio (usuários, produtos, solicitações e vendas), endpoints e arquitetura em camadas (`controllers`, `services`, `repositories`, `models`, `dtos`, `enums`, `security`, `config`, `exceptions` e `handlers`). Siga essa estrutura e não invente padrões complexos antecipadamente.
-- A autenticação é feita com JWT e o acesso é controlado por perfil (`GESTOR` e `CLIENTE`).
-- Os testes são unitários (JUnit 5 e Mockito) e o JaCoCo exige no mínimo 70% de cobertura de linhas no pacote `services`.
+- Persistência: MongoDB (`spring-boot-starter-data-mongodb`), configurado em `application.properties` para `localhost:27017`, banco `poweringa_db`. O projeto não usa JPA.
+- Autenticação com Spring Security e JWT (`com.auth0:java-jwt`). Os cargos são `CLIENTE` e `GESTOR`.
+- A chave do JWT não fica no repositório: vem da variável `JWT_SECRET_KEY` (arquivo `poweringa-api/.env` local, ver `.env.example`). Sem ela, ou com menos de 32 caracteres, a API não inicia.
+- Documentação com springdoc-openapi (Swagger UI em `/swagger-ui.html`).
+- Validação com `spring-boot-starter-validation`; erros tratados em `handlers/GlobalExceptionHandler`.
+- Organização em camadas: `controllers`, `services`, `repositories`, `models`, `dtos`, `enums`, `exceptions`, `handlers`, `security` e `config`.
+- Domínio atual: autenticação e usuários, produtos, vendas e solicitações. Siga a organização existente e não invente padrões complexos antecipadamente.
+- Os testes são unitários (JUnit 5 e Mockito). O JaCoCo exige no mínimo 70% de cobertura de linhas no pacote `services`, verificado no `mvnw verify`.
+
+### Front-end (`poweringa-web/`)
+
+- React 19 com Vite 8, Tailwind CSS 4 e daisyUI 5.
+- Rotas com `react-router-dom`, formulários com `react-hook-form`, requisições com `axios` (`src/services/api.jsx`) e alertas com `sweetalert2`.
+- Comandos: `npm run dev`, `npm run build` e `npm run lint`.
 
 ## Forma de trabalho
 

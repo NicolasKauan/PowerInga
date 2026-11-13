@@ -1,0 +1,183 @@
+# Atualizações do projeto
+
+Registro das mudanças feitas na finalização do front-end, em ordem cronológica (a mais recente no topo).
+Cada entrada informa o que mudou, por quê e o que pode afetar outras partes do sistema.
+
+Branch de trabalho: `feature/add-front-end`.
+
+## Etapas planejadas
+
+| Etapa | Descrição | Status |
+|---|---|---|
+| 0 | Ajustes na API para o front (`/users/me`, CORS) | Concluída |
+| 1 | Base do front: token, autenticação, rotas protegidas, header | Concluída |
+| 2 | Correções do Login e tela de Cadastro | Concluída |
+| 3 | Home do usuário com saldo real | Concluída |
+| 4 | Lojinha e compra de produtos | Concluída |
+| 5 | Poste sua ação | Concluída |
+| 6 | Consultar andamento das solicitações | Concluída |
+| 7 | Painel do gestor (solicitações e usuários) | Concluída |
+
+## Decisões tomadas
+
+- O cadastro usa os campos da API (e-mail, nome e senha). Os campos do protótipo (CPF, nome de usuário) não serão usados.
+- O campo `descricao` do usuário é exibido como **Nome**.
+- O envio de foto ou vídeo em "Poste sua ação" fica de fora, porque a API não suporta upload.
+- As telas de Ajuda e a Home do gestor terão uma versão simples, já que não estão no protótipo.
+- O cadastro público sempre cria usuários `CLIENTE`. Gestores são criados direto no banco.
+
+---
+
+## 13/11/2026
+
+### Integração da main (antes do PR para a main)
+
+- A `main` tinha um commit do João (`5f63e89`) que também atualizava o AGENTS.md, e o merge deu conflito nesse arquivo.
+- **Resolução:** ficou a estrutura desta branch (seções API e Front-end), com dois acréscimos do João: a regra dos testes (JUnit 5, Mockito e JaCoCo com 70% de cobertura em `services`, checado no `mvnw verify`) e a redação dele para a regra de persistência. A frase dele sobre a chave do JWT ficar no `application.properties` foi trocada, porque isso deixou de ser verdade com o PR #19.
+- Verificado com `mvnw clean verify` (67 testes, cobertura atendida), `npm run lint` e `npm run build`.
+- Roteiro da API seguindo o fluxo do front: 40 de 40 cenários OK. Achado pendente: um JSON ilegível (malformado ou com categoria inexistente) volta como 403 sem corpo, em vez de 400. O front não é afetado.
+
+## 12/11/2026
+
+### Segurança: chave do JWT fora do repositório (PR #19, commit `30fc712`)
+
+- A chave que assina os tokens estava escrita no `application.properties` e no README. Ela passou a vir da variável `JWT_SECRET_KEY`, lida de um `poweringa-api/.env` local (ignorado pelo git) ou do sistema.
+- A API **se recusa a iniciar** sem a chave ou com uma chave menor que 32 caracteres (`JwtProperties` com `@Validated`).
+- **Ação de cada pessoa:** copiar o `.env.example` para `.env` e gerar a própria chave (o comando está no arquivo). Quem roda pelo VS Code precisa de `"cwd": "${workspaceFolder}/poweringa-api"` no `launch.json`.
+- Os tokens antigos deixaram de valer, e é preciso fazer login de novo.
+
+> A partir da Etapa 3, a pedido do usuário (por causa do prazo), as decisões foram tomadas pelo assistente e registradas aqui. Vale revisar no PR.
+
+### Etapa 7: Painel do gestor
+
+- `/gestor`: uma home simples, com atalhos para Solicitações e Usuários.
+- `/gestor/solicitacoes`: a lista é separada em **Pendentes** e **Resolvidas**. Cada solicitação mostra o autor (nome e e-mail, cruzando com `GET /users`), a categoria e os pontos.
+  - As pendentes têm os botões Aprovar e Reprovar, com confirmação, que chamam `PATCH /solicitacoes/{id}/aprovar|reprovar`.
+  - Depois de cada decisão, a lista é recarregada, mesmo se der erro. Assim, se outro gestor já tiver resolvido a solicitação, a tela se corrige.
+- `/gestor/usuarios`: uma tabela com nome, e-mail, cargo e pontos (`GET /users`).
+- Para testar, é preciso ter um usuário com `cargo: "GESTOR"` no banco (o cadastro público só cria `CLIENTE`).
+
+### Etapas 5 e 6: Poste sua ação e Consultar andamento
+
+- `/acao`: um formulário com descrição e categoria. As categorias e os pontos espelham o enum `CategoriaRecompensa` da API (`constants/rewardCategories.js`). Se a API mudar os valores, este arquivo precisa acompanhar.
+- Depois do envio, o usuário vai para `/andamento`, com um aviso de sucesso.
+- `/andamento`: as solicitações do cliente, com a categoria, os pontos e o status ("Em análise", "Aprovada" ou "Reprovada").
+- `/ajuda`: uma explicação curta do fluxo e a tabela de pontos por categoria.
+- Os cards da Home agora são links de verdade, e o card inteiro é clicável.
+
+### Etapa 4: Lojinha
+
+- `/loja`: o saldo e os produtos de `GET /produtos`. Cada resgate compra **1 unidade** (`POST /vendas`), com confirmação.
+  - **Decisão:** sem carrinho, porque um item por vez cobre o uso real e é bem mais simples.
+- O botão fica desabilitado quando o saldo não é suficiente. A API continua sendo quem decide.
+- Depois do resgate, o saldo é atualizado. Se essa atualização falhar, o aviso de sucesso explica que o saldo exibido pode estar desatualizado.
+
+**API:** a correção abaixo foi necessária para esta etapa (commit `9b1e9be`).
+- Saldo insuficiente e "solicitação já resolvida" lançavam `RuntimeException` sem handler. A exceção caía na rota `/error`, que o Spring Security bloqueia, e o front recebia **403 sem mensagem**, como se fosse falta de permissão.
+- Foi criada a `BusinessRuleViolation`, tratada no `GlobalExceptionHandler` com **422** e a mensagem.
+
+**Peças compartilhadas do front**, criadas para não repetir código nas 6 telas novas:
+- `PageLayout`: o Header e o fundo cinza.
+- `BalanceCard`: o card de saldo, que se atualiza ao aparecer. Saiu da Home.
+- `ShortcutCard`: os cards de atalho.
+- `RequestFeedback`: os estados de carregando e de erro.
+- `useApiGet`: o hook de busca, com `reload`. Ele ignora respostas que chegam depois de o componente sair da tela.
+- `getApiErrorMessage`: traduz os erros da API (texto ou lista). O cadastro passou a usá-lo.
+- `formatPoints`: a formatação de pontos no padrão pt-BR.
+- O logo do Header agora leva de volta para a home do cargo.
+- O `npm run lint` voltou a passar sem erros: o erro antigo do `UserStorePage.jsx` sumiu com a reescrita da página.
+
+### Etapa 3: Home com saldo real
+
+- O card "Saldo" mostra os pontos reais do usuário (`pontos`, vindo de `GET /users/me`), no formato do pt-BR (ex.: **1.250**), com o rótulo "pontos". Antes, o valor `$34.90` era fixo.
+- Toda vez que a Home abre, ela chama o `refreshUser()` do `AuthProvider`.
+  - **Motivo:** o saldo muda fora da sessão do cliente (quando um gestor aprova uma ação). Sem isso, o cliente veria um saldo velho até recarregar a página.
+  - Enquanto a resposta não chega, a tela mostra o último saldo conhecido. Se a atualização falhar, mantém o valor e avisa "Não foi possível atualizar o saldo agora."
+- Decisões tomadas pelo assistente, a pedido do usuário, para acelerar a entrega.
+
+### Etapa 2: tela de Cadastro (commit `a19fb65`)
+
+- Nova página `RegisterPage` na rota pública `/cadastro`, com o mesmo layout do Login (`AuthLayout` + `FormField`).
+- Campos: Nome (`descricao`), E-mail, Senha e Confirmar senha. A confirmação é validada só no front e não é enviada para a API.
+- O corpo da requisição é montado de forma explícita (`{ descricao, email, senha }`).
+- Respostas da API:
+  - sucesso: o usuário vai para o login, com o aviso "Conta criada!";
+  - 409: "Já existe uma conta com esse e-mail.";
+  - 400: as mensagens de validação da API;
+  - sem resposta: a mensagem de falha de conexão;
+  - qualquer outro erro: uma mensagem genérica.
+- O formato do e-mail e as regras de senha não são validados no front, para não divergirem da API, que é a fonte da regra.
+- Verificado via HTTP: cadastro (200), login com a conta nova (200), e-mail repetido (409), e-mail inválido (400) e nome vazio (400). Os acentos chegam em UTF-8.
+- **Problema já existente, fora do escopo:** `npm run lint` acusa `React` importado e não usado em `UserStorePage.jsx`.
+
+### Testes: pastas corrigidas (sem commit)
+
+- Cinco testes estavam na pasta `test/.../services/`, mas declaravam outro pacote. Foram movidos com `git mv` para a pasta do pacote que declaram:
+  - `AuthControllerTest`, `ProdutosControllerTest`, `SolicitacaoControllerTest` e `UserControllerTest` foram para `controllers/`;
+  - `SecurityFilterTest` foi para `security/`.
+  - **Motivo:** o editor compilava cópias quebradas desses testes em `target/`, e o Maven rodava essas cópias, gerando 5 erros `NoClassDefFound` falsos. Nenhuma linha de código mudou.
+- Resultado: `mvnw clean test` passou com 67 testes, 0 falhas e 0 erros.
+
+### Etapa 2: Nome obrigatório no cadastro (sem commit)
+
+- O campo `descricao` (exibido como **Nome**) do `RegisterRequestDTO` passou a ter `@NotBlank`, com a mensagem `"ERRO: Nome é obrigatório!"`.
+  - **Motivo:** sem isso, era possível criar um usuário sem nome pela API (Postman, Swagger), mesmo com o front exigindo o campo.
+  - **Impacto:** `POST /auth/register` sem `descricao`, ou com `descricao` vazia, agora responde **400**. Os usuários que já estão no banco não são afetados.
+- Novo teste `RegisterRequestDTOValidationTest`, que valida o DTO direto pelo `Validator`. Ele falhou antes da anotação e passou depois dela.
+
+### Documentação: AGENTS.md (sem commit)
+
+- A seção "Estado atual do projeto" foi reescrita para refletir o código de hoje: pacote `com.poweringa.api`, MongoDB (sem JPA), JWT, Swagger, camadas existentes e o front `poweringa-web`.
+  - **Motivo:** o texto antigo descrevia o projeto de agosto (pacote `nika`, persistência indefinida, sem endpoints) e podia levar ferramentas de IA a decisões erradas.
+- Na seção "Convenções", o pacote-base passou para `com.poweringa.api`, e a regra "confirme se usará JPA ou MongoDB" virou "a persistência é MongoDB; não adicione outra tecnologia de banco sem aprovação".
+
+## 11/11/2026
+
+### Etapa 2: Login e Cadastro (em andamento, sem commit)
+
+**API**
+- `cargo` foi removido do `RegisterRequestDTO`. O `AuthService.register` agora sempre cria o usuário como `CLIENTE`.
+  - **Motivo:** antes, qualquer pessoa podia se cadastrar como `GESTOR` enviando `"cargo": "GESTOR"`.
+  - **Impacto:** quem chama `POST /auth/register` (front, Postman, Swagger) não deve mais enviar `cargo`.
+- O teste de cadastro passou a verificar que o usuário é salvo como `CLIENTE` e com a senha criptografada.
+- O exemplo de cadastro no README foi atualizado.
+- Foi removido um `System.out.println` do `AuthService.register` que escrevia o e-mail de cada cadastro no console.
+  - **Motivo:** era código de depuração e expunha um dado pessoal no log.
+
+**Front**
+- Componente `AuthLayout`: painel verde com o logo, compartilhado entre Login e Cadastro.
+- Componente `FormField`: rótulo, campo e mensagem de erro, para não repetir o mesmo bloco em cada formulário.
+- Login:
+  - o botão "Criar uma conta" enviava o formulário; agora é um link para `/cadastro`;
+  - os erros aparecem embaixo de cada campo;
+  - o alerta de sucesso foi removido, e o usuário entra direto;
+  - quando o servidor não responde, aparece uma mensagem de falha de conexão em vez de "senha incorreta".
+
+**Falta:** criar a tela `RegisterPage` e a rota `/cadastro`. Até lá, o link "Criar uma conta" leva a uma página vazia.
+
+### Etapa 1: base do front (commit `c626a57`)
+
+- O axios passou a enviar `Authorization: Bearer <token>` em todas as requisições. Antes, o token era salvo mas nunca enviado.
+- `AuthProvider` / `useAuth` guardam o usuário logado (busca em `GET /users/me`). Ao abrir o app com um token inválido ou expirado, o usuário é deslogado.
+- `ProtectedRoute` libera as rotas conforme o cargo. É só usabilidade: a segurança de verdade continua na API.
+- O `Header` virou um componente reutilizável, com a opção **Sair** ao clicar na foto. No celular, a foto agora aparece, para o "Sair" ficar acessível.
+- O login redireciona conforme o cargo: `CLIENTE` vai para `/home` e `GESTOR` vai para `/gestor`. A tela `/gestor` só será criada na etapa 7.
+
+**Limitação conhecida:** a API responde `403` tanto para token inválido quanto para falta de permissão. Por isso, se o token expirar durante o uso (o token dura 2h), a tela mostra erro em vez de voltar para o login.
+
+### Etapa 0: ajustes na API (commit `2abebbb`)
+
+- Novo endpoint `GET /users/me`, que devolve o usuário logado (`id`, `email`, `descricao`, `cargo`, `pontos`). Qualquer usuário autenticado pode chamar.
+- O CORS passou a aceitar `PUT`, `PATCH` e `DELETE`, além de `GET` e `POST`.
+  - **Motivo:** sem isso, o navegador bloqueava aprovar/reprovar solicitações e editar/remover produtos.
+  - Nenhuma permissão nova foi aberta: quem pode fazer cada operação continua definido no `SecurityConfiguration`.
+
+---
+
+## Observações para o grupo
+
+- **Rodar os testes da API:** é preciso JDK 17. Com Java 8 aparece o erro `No compiler is provided in this environment`.
+  ```powershell
+  $env:JAVA_HOME="<caminho do JDK 17>"; .\mvnw.cmd test
+  ```
+- O `AGENTS.md` está desatualizado: cita o pacote `com.poweringa.nika` e diz que não há endpoints.

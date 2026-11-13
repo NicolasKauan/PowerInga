@@ -3,7 +3,6 @@ package com.poweringa.api.controllers;
 import com.poweringa.api.dtos.LoginRequestDTO;
 import com.poweringa.api.dtos.LoginResponseDTO;
 import com.poweringa.api.dtos.RegisterRequestDTO;
-import com.poweringa.api.enums.UserRole;
 import com.poweringa.api.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class AuthControllerTest {
 
     @Test
     void registerDeveRetornarMensagemEStatusOk() {
-        RegisterRequestDTO request = new RegisterRequestDTO("teste@teste.com", "123", "Desc", UserRole.CLIENTE);
+        RegisterRequestDTO request = new RegisterRequestDTO("teste@teste.com", "123", "Desc");
 
         ResponseEntity<String> response = authController.register(request);
 

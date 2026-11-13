@@ -1,5 +1,6 @@
 package com.poweringa.api.services;
 
+import com.poweringa.api.exceptions.BusinessRuleViolation;
 import com.poweringa.api.dtos.ProdutoResponseDTO;
 import com.poweringa.api.dtos.VendaCreateDTO;
 import com.poweringa.api.dtos.VendaItemCreateDTO;
@@ -225,7 +226,7 @@ class VendaServiceTest {
     void debitPointsFromUserBalanceNaoDeveSalvarQuandoSaldoForInsuficiente() {
         User cliente = criarUsuario("cliente-1", UserRole.CLIENTE, 20);
 
-        RuntimeException excecao = assertThrows(RuntimeException.class,
+        BusinessRuleViolation excecao = assertThrows(BusinessRuleViolation.class,
                 () -> vendaService.debitPointsFromUserBalance(40, cliente));
 
         assertTrue(excecao.getMessage().startsWith("ERRO:"));
