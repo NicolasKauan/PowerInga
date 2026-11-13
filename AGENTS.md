@@ -8,11 +8,13 @@ Estas instruções valem para todo o repositório PowerInga. O projeto é acadê
 
 - A aplicação está em `poweringa-api/`.
 - Backend em Java 17 com Spring Boot 4.1.0 e Maven Wrapper.
-- Pacote-base: `com.poweringa.nika`.
-- A configuração atual contém apenas `spring.application.name=nika`.
-- O `pom.xml` inclui Spring MVC, Security, JPA, MongoDB e Lombok.
-- A escolha e a configuração efetiva da persistência ainda não estão definidas. Não suponha que JPA e MongoDB serão usados juntos; confirme a decisão antes de criar entidades, documentos, repositories ou configurações de banco.
-- O projeto ainda não possui domínio, endpoints ou arquitetura de camadas consolidados. Não invente padrões complexos antecipadamente.
+- Pacote-base: `com.poweringa.api`.
+- A configuração atual contém `spring.application.name=api`, a conexão com o MongoDB (`localhost:27017`, banco `poweringa_db`) e a chave do JWT (`api.security.token.secret-key`).
+- O `pom.xml` inclui Spring MVC, Security, Validation, MongoDB, JWT (`java-jwt`), Springdoc OpenAPI (Swagger) e Lombok.
+- A persistência é feita com MongoDB (Spring Data MongoDB). Não use JPA nem adicione outro banco sem antes confirmar a decisão.
+- O projeto já possui domínio (usuários, produtos, solicitações e vendas), endpoints e arquitetura em camadas (`controllers`, `services`, `repositories`, `models`, `dtos`, `enums`, `security`, `config`, `exceptions` e `handlers`). Siga essa estrutura e não invente padrões complexos antecipadamente.
+- A autenticação é feita com JWT e o acesso é controlado por perfil (`GESTOR` e `CLIENTE`).
+- Os testes são unitários (JUnit 5 e Mockito) e o JaCoCo exige no mínimo 70% de cobertura de linhas no pacote `services`.
 
 ## Forma de trabalho
 
@@ -44,7 +46,7 @@ Em trabalhos maiores, divida a implementação em partes compreensíveis e infor
 ## Convenções de implementação
 
 - Siga os padrões já presentes no projeto e mantenha o código compatível com Java 17.
-- Mantenha classes sob o pacote-base `com.poweringa.nika`, organizando subpacotes por responsabilidade ou funcionalidade conforme a estrutura evoluir.
+- Mantenha classes sob o pacote-base `com.poweringa.api`, organizando subpacotes por responsabilidade ou funcionalidade conforme a estrutura evoluir.
 - Use injeção por construtor. Evite injeção direta em campos.
 - Mantenha controllers focados no protocolo HTTP, regras de negócio fora dos controllers e acesso a dados isolado em repositories.
 - Use DTOs nos limites da API quando houver entrada ou saída HTTP; não exponha entidades de persistência automaticamente.
@@ -52,7 +54,7 @@ Em trabalhos maiores, divida a implementação em partes compreensíveis e infor
 - Nunca inclua senhas, tokens, chaves ou credenciais no repositório. Use variáveis de ambiente ou configuração externa e forneça exemplos seguros quando necessário.
 - Não altere versões ou adicione bibliotecas sem justificar a necessidade e obter aprovação quando houver impacto relevante.
 - Lombok está disponível, mas use-o apenas quando melhorar a legibilidade; não o aplique indiscriminadamente.
-- Antes de usar JPA ou MongoDB, confirme qual tecnologia atende à funcionalidade solicitada e remova duplicidades de dependências apenas em uma tarefa explicitamente aprovada para isso.
+- A persistência do projeto é MongoDB. Antes de usar outra tecnologia de persistência (como JPA), confirme a decisão com o usuário.
 
 ## Testes e validação
 
